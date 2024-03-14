@@ -1,3 +1,5 @@
+import { ClerkProvider } from "@clerk/clerk-react";
+
 function ContextProviders({ children, pageProps }) {
   return (
     <ClerkProvider
