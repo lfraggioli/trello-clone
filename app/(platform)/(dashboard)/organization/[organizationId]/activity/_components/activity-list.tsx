@@ -14,7 +14,10 @@ export const ActivityList = async () => {
     const auditLogs = await db.auditLog.findMany({
         where: {
             orgId
-        }
+        },
+        orderBy: {
+            createdAt: "desc"
+        },
     });
     return (
         <ol className="space-y-4 mt-4">
