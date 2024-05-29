@@ -9,6 +9,7 @@ import { CreateBoard } from "./schema";
 import { InputType, ReturnType } from "./types";
 import { ACTION, ENTITY_TYPE } from "@prisma/client";
 import { createAuditLog } from "@/lib/create-audit-log";
+import { incrementAvailableCount, hasAvailableCount } from "@/lib/org-limit";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
   const { userId, orgId } = auth();
@@ -18,6 +19,14 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       error: "Unauthorized",
     };
   }
+
+  const canCreate = await hasAvailableCount();
+  if (!canCreate) {
+    return {
+      error: "No more boards available",
+    };
+  }
+
   const { title, image } = data;
   const [imageId, imageThumbUrl, imageFullUrl, imageLinkHTML, imageUserName] =
     image.split("|");
@@ -47,6 +56,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         imageLinkHTML,
       },
     });
+    await incrementAvailableCount();
     await createAuditLog({
       entityTitle: board.title,
       entityId: board.id,
